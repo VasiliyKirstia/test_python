@@ -13,13 +13,8 @@ from sqlalchemy.sql import expression
 
 @app.route('/')
 @app.route('/index')
-@login_required
 def index():
-    tasks = [
-        {'author': user, 'body': 'Test task #1'},
-        {'author': user, 'body': 'Test task #2'}
-    ]
-    return render_template("index.html", title='Home Page', tasks=tasks)
+    return render_template("index.html", title='Home Page')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -32,6 +27,8 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
+        if not user.is_superuser and not user.can_review_tasks:
+            return redirect(url_for('index'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -61,14 +58,3 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
-
-
-@app.route('/user/<username>')
-@login_required
-def user(username):
-    user = User.query.filter_by(username=username).first_or_404()
-    tasks = [
-        {'author': user, 'body': 'Test task #1'},
-        {'author': user, 'body': 'Test task #2'}
-    ]
-    return render_template('user.html', user=user, tasks=tasks)

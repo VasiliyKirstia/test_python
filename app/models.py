@@ -11,7 +11,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     is_active = db.Column(db.Boolean, server_default=expression.false(), nullable=False)
     is_superuser = db.Column(db.Boolean, server_default=expression.false(), nullable=False)
+    can_review_tasks = db.Column(db.Boolean, server_default=expression.false(), nullable=False)
     password_hash = db.Column(db.String(128))
+    tasks = db.relationship('Task', backref='creator')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -32,7 +34,7 @@ class Task(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '<Task {}>'.format(self.body)
+        return 'Task {}'.format(self.id)
 
 
 @login.user_loader

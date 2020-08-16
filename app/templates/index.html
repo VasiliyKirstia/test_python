@@ -1,8 +1,5 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Hi, {{ current_user.username }}!</h1>
-    {% for task in tasks %}
-    <div><p>{{ task.author.username }} : <b>{{ task.created_at }}</b></p></div>
-    {% endfor %}
+    <h1>Hi!</h1>
 {% endblock %}
