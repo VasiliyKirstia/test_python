@@ -16,7 +16,7 @@ RUN venv/bin/pip install gunicorn
 COPY app app
 COPY migrations migrations
 COPY test_python.py config.py boot.sh ./
-RUN ["chmod", "+x", "/boot.sh"]
+RUN chmod +x boot.sh
 
 ENV FLASK_APP test_python.py
 
