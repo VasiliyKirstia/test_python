@@ -6,7 +6,11 @@ WORKDIR /home/test_python
 
 COPY requirements.txt requirements.txt
 RUN python -m venv venv
-RUN venv/bin/pip install -r requirements.txt
+RUN \
+apk add --no-cache python3 postgresql-libs && \
+ apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev postgresql-dev && \
+ python3 -m pip install -r requirements.txt --no-cache-dir && \
+ apk --purge del .build-deps
 RUN venv/bin/pip install gunicorn
 
 COPY app app
@@ -20,4 +24,6 @@ RUN chown -R test_python:test_python ./
 USER test_python
 
 EXPOSE 5000
-ENTRYPOINT ["./boot.sh"]
+ENTRYPOINT ["sh","./boot.sh"]
+
+CMD ["python3", "app.py"]
