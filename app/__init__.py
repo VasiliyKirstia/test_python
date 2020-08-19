@@ -3,7 +3,6 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-
 from flask_admin import Admin
 from flask_admin import AdminIndexView, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
@@ -13,6 +12,7 @@ from flask import redirect, url_for, request
 from flask_security import SQLAlchemyUserDatastore
 
 app = Flask(__name__)
+
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -54,7 +54,6 @@ class TaskReview(BaseView):
 
 
 admin = Admin(app, 'FlaskApp', url='/', index_view=HomeAdminView(name='Home'))
-
 admin.add_view(TaskModelView(Task, db.session))
 admin.add_view(TaskReview(name='Task review', endpoint='task_review'))
 
