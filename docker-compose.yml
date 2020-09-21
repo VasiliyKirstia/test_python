@@ -1,51 +1,32 @@
 version: '3'
 services:
-  db:
-    image: "postgres:9.6.5"
-    volumes:
-      - "dbdata:/var/lib/postgresql/data"
-    env_file:
-      - env_file
-    ports:
-      - 5432:5432
-    logging:
-       driver: json-file
-       options:
-         max-size: "32m"
-         max-file: "1"
 
-  test_python:
-    build: .
-    env_file:
-      - env_file
-    volumes:
-      - .:/opt/services/flaskapp/src
-      - ./logs:/app/logs
-    ports:
-      - "5500:5500"
-    depends_on:
-      - db
-    logging:
-      driver: json-file
-      options:
-        max-size: "32m"
-        max-file: "1"
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: py_app
 
-    labels:
-      com.datadoghq.ad.check_names: '[<INTEGRATION_NAME>]'
-      com.datadoghq.ad.init_configs: '[<INIT_CONFIG>]'
-      com.datadoghq.ad.instances: '[<INSTANCE_CONFIG>]'
+    volumes:
+      - ./dlogs:/app/dlogs
+
+    command: ['python', 'test_python.py']
 
   datadog:
-#    links:
-#      - redis # Connect the Datadog Agent container to the Redis container
     image: datadog/agent:7
+    container_name: datadog_servise
+    depends_on:
+      - python
     environment:
       - DD_API_KEY=
+      - DD_SITE=datadoghq.eu
+      - DD_CHECK_RUNNERS=1
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_CONTAINER_EXCLUDE=name:datadog_servise
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
-
-volumes:
-  dbdata:
+      - /opt/datadog-agent/run:/opt/datadog-agent/run:rw
