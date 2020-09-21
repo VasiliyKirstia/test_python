@@ -9,6 +9,8 @@ from werkzeug.urls import url_parse
 from app import db
 from app.forms import RegistrationForm
 from sqlalchemy.sql import expression
+import logging
+from ddtrace import tracer
 
 
 @app.route('/')
@@ -58,3 +60,14 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/errorex')
+def errorex():
+    logger = logging.getLogger('gunicorn.error')
+    logger.info('Started')
+    try:
+        x = 5/0
+    except Exception:
+        logger.error('ZeroDivisionError in first container')
+

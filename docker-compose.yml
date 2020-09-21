@@ -6,13 +6,46 @@ services:
       - "dbdata:/var/lib/postgresql/data"
     env_file:
       - env_file
+    ports:
+      - 5432:5432
+    logging:
+       driver: json-file
+       options:
+         max-size: "32m"
+         max-file: "1"
+
   test_python:
     build: .
     env_file:
       - env_file
     volumes:
       - .:/opt/services/flaskapp/src
+      - ./logs:/app/logs
+    ports:
+      - "5500:5500"
     depends_on:
       - db
+    logging:
+      driver: json-file
+      options:
+        max-size: "32m"
+        max-file: "1"
+
+    labels:
+      com.datadoghq.ad.check_names: '[<INTEGRATION_NAME>]'
+      com.datadoghq.ad.init_configs: '[<INIT_CONFIG>]'
+      com.datadoghq.ad.instances: '[<INSTANCE_CONFIG>]'
+
+  datadog:
+#    links:
+#      - redis # Connect the Datadog Agent container to the Redis container
+    image: datadog/agent:7
+    environment:
+      - DD_API_KEY=
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+
 volumes:
   dbdata:

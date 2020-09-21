@@ -10,6 +10,7 @@ from flask_security import Security
 from flask_security import current_user
 from flask import redirect, url_for, request
 from flask_security import SQLAlchemyUserDatastore
+from app.exceptions import BaseHttpException, http_exception_handler, python_exception_handler
 
 app = Flask(__name__)
 
@@ -57,4 +58,8 @@ admin = Admin(app, 'FlaskApp', url='/', index_view=HomeAdminView(name='Home'))
 admin.add_view(TaskModelView(Task, db.session))
 admin.add_view(TaskReview(name='Task review', endpoint='task_review'))
 
+app.register_error_handler(BaseHttpException, http_exception_handler)
+app.register_error_handler(Exception, python_exception_handler)
+
 from app import routes, models
+
